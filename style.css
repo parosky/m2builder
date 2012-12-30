@@ -1,0 +1,59 @@
+.res{
+	margin-top: 2em;
+	margin-left: 1em;
+}
+
+.res-num-1{
+	color: #0000ff;
+}
+
+.res-num-2{
+	font-weight: bold;
+	font-size: 1.2em;
+	color: #0000ff;
+}
+
+.res-num-3{
+	font-weight: bold;
+	font-size: 1.4em;
+	color: #008000;
+}
+
+.res-num-4{
+	font-weight: bold;
+	font-size: 1.6em;
+	color: #ff0000;
+}
+
+.res-num-5{
+	font-weight: bold;
+	font-size: 1.8em;
+	color: #ff0000;
+}
+
+.spacer{
+	float: left;
+}
+
+.number{
+	float: left;
+}
+
+.name{
+	float: left;
+}
+
+.date{
+	float: left;
+}
+
+.id{
+	float: left;
+}
+
+.body{
+	margin-top: 1em;
+	margin-left: 1em;
+	clear: both;
+}
+
