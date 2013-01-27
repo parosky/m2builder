@@ -6,11 +6,14 @@ import random
 import twopy
 import re
 import wordpress_xmlrpc
+import os
+import sys
 
 re_res = re.compile('>>[0-9]+')
 re_link = re.compile(r'([^"]|^)(https?|ftp)(://[\w:;/.!?%#&=+-]+)')
 re_sssp = re.compile(r'([^"]|^)(sssps?|ftp)(://[\w:;/.!?%#&=+-]+)')
 re_img = re.compile(r'([^"]|^)(https?)(://[\w:;/.?%#&=+-]+\.(jpg|jpeg|png|gif|JPG|JPEG|PNG|GIF))')
+self_path = os.path.dirname(os.path.abspath( __file__ ))
 
 def make_use_tree(res):
     """ is_use -> 1 for all responses in the tree """ 
@@ -30,7 +33,7 @@ def make_html_res(res):
     else:
         res.is_used = True
     rp = [make_html_res(r) for r in res.res_from]
-    html = open('res.html').read().decode('utf-8')
+    html = open('%s/res.html' % self_path).read().decode('utf-8')
     html = html.replace('<number>', str(res.number))
     html = html.replace('<name>', res.name)
     html = html.replace('<id>', res.ID)
@@ -77,12 +80,11 @@ def post_to_wordpress(title, content1, content2=None):
 
 def run():
     """ main function """
-
+    
     # get popular thread
     board = twopy.Board(random.choice(settings.crawl.values()))
     board.retrieve()
-    while True:
-        thread = random.choice(board[:20])
+    for thread in board:
         if thread.res > 200:
             break
     thread.retrieve()
@@ -116,8 +118,10 @@ def run():
     while count_use(thread) < settings.min_num_res:
         make_use_tree(random.choice(thread))
 
+    # make html
     html = make_html_thread(thread)
 
+    # post to wordpress
     pos = html.index('<div class="res', 100)
     post_to_wordpress(thread.title, html[:pos], html[pos:])
 
