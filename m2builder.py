@@ -10,14 +10,14 @@ import os
 import sys
 import codecs
 
-log_directory = './log'
+self_path = os.path.dirname(os.path.abspath( __file__ ))
+log_directory = self_path + '/log'
 log_filename = 'm2builder.log'
 
 re_res = re.compile('>>[0-9]+')
 re_link = re.compile(r'([^"]|^)(https?|ftp)(://[\w:;/.!?%#&=+-]+)')
 re_sssp = re.compile(r'([^"]|^)(sssps?|ftp)(://[\w:;/.!?%#&=+-]+)')
 re_img = re.compile(r'([^"]|^)(https?)(://[\w:;/.?%#&=+-]+\.(jpg|jpeg|png|gif|JPG|JPEG|PNG|GIF))')
-self_path = os.path.dirname(os.path.abspath( __file__ ))
 
 def read_log():
     ret = []
