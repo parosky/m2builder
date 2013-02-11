@@ -8,12 +8,35 @@ import re
 import wordpress_xmlrpc
 import os
 import sys
+import codecs
+
+log_directory = './log'
+log_filename = 'm2builder.log'
 
 re_res = re.compile('>>[0-9]+')
 re_link = re.compile(r'([^"]|^)(https?|ftp)(://[\w:;/.!?%#&=+-]+)')
 re_sssp = re.compile(r'([^"]|^)(sssps?|ftp)(://[\w:;/.!?%#&=+-]+)')
 re_img = re.compile(r'([^"]|^)(https?)(://[\w:;/.?%#&=+-]+\.(jpg|jpeg|png|gif|JPG|JPEG|PNG|GIF))')
 self_path = os.path.dirname(os.path.abspath( __file__ ))
+
+def read_log():
+    ret = []
+    fn = '%s/%s' % (log_directory, log_filename)
+    if not os.path.exists(fn):
+        return ret
+    else:
+        for line in codecs.open(fn, 'r', 'utf-8'):
+            d = {}
+            for l in line.strip().split('\t'):
+                d[l[:l.index(':')]] = l[l.index(':')+1:]
+            ret.append(d)
+    return ret
+
+def write_log(data):
+    if not os.path.exists(log_directory):
+        os.mkdir(log_directory)
+    line = '\t'.join(['%s:%s' % (key, data[key]) for key in data])
+    codecs.open('%s/%s' % (log_directory, log_filename), 'a', 'utf-8').write('%s\n' % line)
 
 def make_use_tree(res):
     """ is_use -> 1 for all responses in the tree """ 
@@ -81,12 +104,25 @@ def post_to_wordpress(title, content1, content2=None):
 def run():
     """ main function """
     
+    # get posted title list
+    posted_title_list = [l['title'] for l in read_log()]
+
     # get popular thread
-    board = twopy.Board(random.choice(settings.crawl.values()))
-    board.retrieve()
-    for thread in board:
-        if thread.res > 200:
+    count = 0
+    is_ok = False
+    while True:
+        board = twopy.Board(random.choice(settings.crawl.values()))
+        board.retrieve()
+        for thread in board:
+            if thread.title not in posted_title_list and thread.res > 300:
+                is_ok = True
+                break
+        if is_ok:
             break
+        else:
+            count += 1
+            if count > 10:
+                exit()
     thread.retrieve()
    
     # initialize properties
@@ -124,6 +160,8 @@ def run():
     # post to wordpress
     pos = html.index('<div class="res', 100)
     post_to_wordpress(thread.title, html[:pos], html[pos:])
+
+    write_log({'title': thread.title})
 
 if __name__ == '__main__':
     run()
